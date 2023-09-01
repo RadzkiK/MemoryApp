@@ -67,6 +67,7 @@
             android:padding="15dp"
             android:layout_marginVertical="25dp"
             android:layout_gravity="center"
+            android:textColor="#FFFFFF"
             android:backgroundTint = "#0000ff"
             android:text="Dodaj"
             android:textSize="20dp" />
@@ -78,6 +79,7 @@
             android:padding="15dp"
             android:layout_marginVertical="25dp"
             android:layout_gravity="center"
+            android:textColor="#FFFFFF"
             android:backgroundTint = "#0000ff"
             android:text="Przeglądaj wszystkie"
             android:textSize="20dp" />

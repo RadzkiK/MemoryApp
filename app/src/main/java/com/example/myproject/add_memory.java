@@ -96,11 +96,6 @@ public class add_memory extends Fragment {
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
 
-//        if(imagePath == null) {
-//            imagePath = savedInstanceState.getString("iPath");
-//            //imageView.setImageURI(Uri.parse(imagePath));
-//        }
-
 
     }
 
