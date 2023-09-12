@@ -1,6 +1,14 @@
 package com.example.myproject;
 
+import android.Manifest;
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -9,6 +17,8 @@ import androidx.activity.result.PickVisualMediaRequest;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 
@@ -24,14 +34,22 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.example.myproject.Database.MemoriesDatabase;
+import com.example.myproject.Database.MemoriesExecutors;
+import com.example.myproject.Database.MemoryClass;
+
 import java.io.IOException;
+import java.util.Date;
+import java.util.Objects;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 /**
  * A simple {@link Fragment} subclass.
  * Use the {@link add_memory#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class add_memory extends Fragment {
+public class add_memory extends Fragment implements LocationListener {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -44,9 +62,15 @@ public class add_memory extends Fragment {
     private Button confirmButton;
     private Button cameraButton;
     private Button galleryButton;
+    private Button showButton;
     private ImageView imageView;
     private EditText title;
     private EditText description;
+    private MemoriesDatabase memoriesDatabase;
+    private LocationManager locationManager;
+    private volatile Long memoryID;
+    private String location;
+    private APIThread apiThread;
 
     // Registers a photo picker activity launcher in single-select mode.
     ActivityResultLauncher<PickVisualMediaRequest> pickMedia =
@@ -54,6 +78,8 @@ public class add_memory extends Fragment {
                 // Callback is invoked after the user selects a media item or closes the
                 // photo picker.
                 if (uri != null) {
+                    int flag = Intent.FLAG_GRANT_READ_URI_PERMISSION;
+                    requireContext().getContentResolver().takePersistableUriPermission(uri, flag);
                     Log.d("PhotoPicker", "Selected URI: " + uri);
                     imageView.setImageURI(uri);
                     imagePath = uri.toString();
@@ -91,12 +117,27 @@ public class add_memory extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        memoriesDatabase = MemoriesDatabase.getInstance(this.getContext());
+
         if (getArguments() != null) {
             imagePath = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+        locationManager = (LocationManager) requireActivity().getSystemService(Context.LOCATION_SERVICE);
 
+        if(ActivityCompat.checkSelfPermission(requireContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION) !=
+                PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(requireContext(), android.Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED)
+        {
+            ActivityCompat.requestPermissions(requireActivity(), new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.ACCESS_FINE_LOCATION},1);
 
+            return;
+        }
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
+
+        apiThread = new APIThread();
+        new Thread(apiThread).start();
     }
 
     @Override
@@ -107,6 +148,7 @@ public class add_memory extends Fragment {
         confirmButton = view.findViewById(R.id.confirm_add);
         cameraButton = view.findViewById(R.id.camera_button);
         galleryButton = view.findViewById(R.id.gallery_button);
+        showButton = view.findViewById(R.id.show_add);
         imageView = view.findViewById(R.id.imageView_add);
         title = view.findViewById(R.id.title_add);
         description = view.findViewById(R.id.description_add);
@@ -115,7 +157,7 @@ public class add_memory extends Fragment {
             imageView.setImageURI(Uri.parse(imagePath));
         } else {
             if(savedInstanceState != null) {
-                imagePath = savedInstanceState.getString("iPath");
+                imagePath = savedInstanceState.getString("imagePath");
                 imageView.setImageURI(Uri.parse(imagePath));
             }
         }
@@ -124,11 +166,45 @@ public class add_memory extends Fragment {
         View.OnClickListener listener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (v.getId() == confirmButton.getId()) {
-                    Navigation.findNavController(view).navigate(R.id.navigate_to_memory_from_add);
+
+                Future submitted;
+
+//                MemoriesExecutors.getInstance().getDiskIO().execute(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        MemoryClass memory = new MemoryClass(title.getText().toString(), description.getText().toString(), imagePath);
+//                        memoryID = memoriesDatabase.memoriesDao().insertMemory(memory);
+//                        System.out.println("DOdano do bazy memoryID:" + memoryID);
+//                    }
+//                });
+
+                if(v.getId() == confirmButton.getId())
+                {
+                    submitted = MemoriesExecutors.getInstance().getDiskIO().submit(new Runnable() {
+                        @Override
+                        public void run() {
+                            MemoryClass memory = new MemoryClass(title.getText().toString(), description.getText().toString(), location + " Date: " + new Date(), apiThread.getQuote(), imagePath);
+                            memoryID = memoriesDatabase.memoriesDao().insertMemory(memory);
+                            System.out.println("DOdano do bazy memoryID:" + memoryID);
+                            Toast.makeText(getContext(), "Pomyślnie dodano do bazy", Toast.LENGTH_LONG).show();
+                        }
+                    });
                 }
             }
         };
+
+        View.OnClickListener showListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (v.getId() == showButton.getId() && memoryID != null) {
+                    Bundle bundle = new Bundle();
+                    bundle.putLong("memoryID", memoryID);
+                    Navigation.findNavController(view).navigate(R.id.navigate_to_memory_from_add, bundle);
+                }
+            }
+        };
+
+
 
         View.OnClickListener cameraListener = new View.OnClickListener() {
             @Override
@@ -193,14 +269,19 @@ public class add_memory extends Fragment {
         confirmButton.setOnClickListener(listener);
         cameraButton.setOnClickListener(cameraListener);
         galleryButton.setOnClickListener(galleryListener);
+        showButton.setOnClickListener(showListener);
 
         return view;
     }
 
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
-        outState.putString("iPath", imagePath);
+        outState.putString("imagePath", imagePath);
         super.onSaveInstanceState(outState);
     }
 
+    @Override
+    public void onLocationChanged(@NonNull Location l) {
+        this.location = "Latitude: " + l.getLatitude() + " Longitude: " + l.getLongitude();
+    }
 }

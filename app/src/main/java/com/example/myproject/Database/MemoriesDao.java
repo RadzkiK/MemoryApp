@@ -13,10 +13,9 @@ public interface MemoriesDao {
     @Query("SELECT * FROM memories")
     public MemoryClass[] loadAllMemories();
 
-    @Query("SELECT * FROM memories WHERE id == :memoryID")
-    public MemoryClass loadMemoryWithID(int memoryID);
-
     @Query("SELECT photoPath FROM memories WHERE id == :memoryID")
-    public String loadImagePathOfMemoryWithID(int memoryID);
+    public String loadPhotoPathOfImageWithID(Long memoryID);
 
+    @Query("SELECT * FROM memories WHERE id == :memoryID")
+    public MemoryClass loadMemoryWithID(Long memoryID);
 }

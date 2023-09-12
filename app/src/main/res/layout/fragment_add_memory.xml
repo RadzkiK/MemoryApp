@@ -70,16 +70,38 @@
                 android:gravity="start"
                 tools:ignore="TextSizeCheck" />
 
-            <Button
-                android:id="@+id/confirm_add"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Dodaj"
+                android:orientation="horizontal"
                 android:layout_gravity="center"
-                android:textColor="#FFFFFF"
-                android:layout_marginTop="10dp"
-                android:backgroundTint="#0000ff"
-                />
+                android:padding="10dp">
+
+                <Button
+                    android:id="@+id/confirm_add"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Dodaj"
+                    android:layout_gravity="center"
+                    android:textColor="#FFFFFF"
+                    android:layout_marginTop="10dp"
+                    android:backgroundTint="#0000ff"
+                    android:layout_marginHorizontal="12dp"
+                    />
+
+                <Button
+                    android:id="@+id/show_add"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Zobacz"
+                    android:layout_gravity="center"
+                    android:textColor="#FFFFFF"
+                    android:layout_marginTop="10dp"
+                    android:backgroundTint="#0000ff"
+                    android:layout_marginHorizontal="12dp"
+                    />
+
+            </LinearLayout>
 
         </LinearLayout>
     </ScrollView>

@@ -3,10 +3,19 @@ package com.example.myproject;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.ListView;
+
+import com.example.myproject.Database.MemoriesDatabase;
+import com.example.myproject.Database.MemoriesExecutors;
+import com.example.myproject.Database.MemoriesListAdapter;
+import com.example.myproject.Database.MemoryClass;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -23,6 +32,11 @@ public class memory_list_fragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+
+    private ListView listView;
+    private MemoryClass memories[];
+    private MemoriesDatabase memoriesDatabase;
+    private Button backButton;
 
     public memory_list_fragment() {
         // Required empty public constructor
@@ -49,16 +63,66 @@ public class memory_list_fragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        memoriesDatabase = MemoriesDatabase.getInstance(this.getContext());
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+        MemoriesExecutors.getInstance().getDiskIO().submit(new Runnable() {
+            @Override
+            public void run() {
+                memories = memoriesDatabase.memoriesDao().loadAllMemories();
+                System.out.println("Pobrano wspomnienia z bazy danych");
+                notifyAll();
+            }
+        });
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_memory_list_fragment, container, false);
+        View view = inflater.inflate(R.layout.fragment_memory_list_fragment, container, false);
+
+        listView = view.findViewById(R.id.list);
+        backButton = view.findViewById(R.id.backButton_list);
+
+        if(memories != null) {
+            MemoriesListAdapter memoriesListAdapter = new MemoriesListAdapter(getContext(), memories);
+            listView.setAdapter(memoriesListAdapter);
+        } else {
+//            Thread thread = new Thread(new Runnable() {
+//                @Override
+//                public void run() {
+//                    try {
+//                        wait(100);
+//                    } catch (InterruptedException e) {
+//                        throw new RuntimeException(e);
+//                    }
+//                }
+//            });
+//            thread.start();
+        }
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Bundle bundle = new Bundle();
+                bundle.putLong("memoryID", l);
+                Navigation.findNavController(view).navigate(R.id.navigate_to_memory_from_list, bundle);
+            }
+        });
+
+        backButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(view.getId() == backButton.getId()) {
+                    Navigation.findNavController(view).navigate(R.id.navigate_to_home_from_list);
+                }
+            }
+        });
+
+        return view;
     }
 }

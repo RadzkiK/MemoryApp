@@ -1,5 +1,6 @@
 package com.example.myproject;
 
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -9,6 +10,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.example.myproject.Database.MemoriesDatabase;
+import com.example.myproject.Database.MemoriesExecutors;
+import com.example.myproject.Database.MemoryClass;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -19,13 +27,20 @@ public class memory extends Fragment {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
+    private static final String ARG_PARAM1 = "memoryID";
     private static final String ARG_PARAM2 = "param2";
 
     // TODO: Rename and change types of parameters
-    private String mParam1;
+    private Long memoryID;
     private String mParam2;
+    private TextView title;
+    private TextView description;
+    private TextView meta;
+    private TextView quote;
+    private ImageView imageView;
     private Button leaveButton;
+    private MemoriesDatabase memoriesDatabase;
+    private MemoryClass memory;
     public memory() {
         // Required empty public constructor
     }
@@ -51,9 +66,19 @@ public class memory extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        memoriesDatabase = MemoriesDatabase.getInstance(this.getContext());
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
+            memoryID = getArguments().getLong(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
+        }
+        if(memoryID != null)
+        {
+            MemoriesExecutors.getInstance().getDiskIO().submit(new Runnable() {
+                @Override
+                public void run() {
+                    memory = memoriesDatabase.memoriesDao().loadMemoryWithID(memoryID);
+                }
+            });
         }
     }
 
@@ -63,8 +88,22 @@ public class memory extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_memory, container, false);
 
+        title = view.findViewById(R.id.title_memory);
+        description = view.findViewById(R.id.description_memory);
+        meta = view.findViewById(R.id.meta_memory);
+        imageView = view.findViewById(R.id.imageView_memory);
+        quote = view.findViewById(R.id.quote_memory);
 
         leaveButton = view.findViewById(R.id.leave_memory);
+
+
+        if(memory != null) {
+            title.setText(memory.getTitle());
+            description.setText(memory.getDescription());
+            imageView.setImageURI(Uri.parse(memory.getPhotoPath()));
+            quote.setText(memory.getQoute());
+            meta.setText(memory.getMetaData());
+        }
 
         View.OnClickListener listener = new View.OnClickListener() {
             @Override

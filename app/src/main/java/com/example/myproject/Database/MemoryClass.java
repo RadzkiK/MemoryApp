@@ -7,8 +7,25 @@ import androidx.room.PrimaryKey;
 @Entity(tableName = "memories")
 public class MemoryClass {
 
+    public MemoryClass() {
+    }
+
+    public MemoryClass(String title, String description, String metaData, String qoute, String photoPath) {
+        this.title = title;
+        this.description = description;
+        this.metaData = metaData;
+        this.qoute = qoute;
+        this.photoPath = photoPath;
+    }
+
+    public MemoryClass(String title, String description, String photoPath) {
+        this.title = title;
+        this.description = description;
+        this.photoPath = photoPath;
+    }
+
     @PrimaryKey(autoGenerate = true)
-    public int id;
+    public Long id;
 
     @ColumnInfo
     public String title;
@@ -25,6 +42,27 @@ public class MemoryClass {
     @ColumnInfo
     public String photoPath;
 
+    public String getTitle() {
+        return title;
+    }
 
+    public String getDescription() {
+        return description;
+    }
 
+    public String getMetaData() {
+        return metaData;
+    }
+
+    public String getQoute() {
+        return qoute;
+    }
+
+    public String getPhotoPath() {
+        return photoPath;
+    }
+
+    public Long getId() {
+        return id;
+    }
 }

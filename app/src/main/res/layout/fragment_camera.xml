@@ -9,7 +9,7 @@
     <androidx.camera.view.PreviewView
         android:id="@+id/camera_previewView"
         android:layout_width="match_parent"
-        android:layout_height="376dp" >
+        android:layout_height="677dp">
 
     </androidx.camera.view.PreviewView>
     <Button
@@ -21,12 +21,5 @@
         android:textColor="#FFFFFF"
         android:layout_gravity="center|bottom"/>
 
-    <ImageView
-        android:id="@+id/camera_imageView"
-        android:layout_gravity="center_horizontal|bottom"
-        android:layout_marginBottom="70dp"
-        android:layout_width="233dp"
-        android:layout_height="216dp"
-        tools:src="@tools:sample/avatars" />
 
 </FrameLayout>

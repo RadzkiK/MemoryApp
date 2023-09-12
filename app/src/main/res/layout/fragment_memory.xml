@@ -42,7 +42,16 @@
             android:layout_marginVertical="10dp"
             android:layout_weight="1"
             android:text="TextView"
-            android:textSize="15dp" />
+            android:textSize="17dp" />
+
+        <TextView
+            android:id="@+id/quote_memory"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_marginVertical="10dp"
+            android:layout_weight="1"
+            android:text="TextView"
+            android:textSize="20dp" />
 
         <TextView
             android:id="@+id/meta_memory"

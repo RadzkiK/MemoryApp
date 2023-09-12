@@ -61,7 +61,6 @@ public class MyCamera extends Fragment {
     private Context AppContext;
     private ImageCapture imageCapture;
     private ContentValues contentValues;
-    private ImageView imageView;
     private Bitmap imageBitmap;
 
     public MyCamera() {
@@ -117,8 +116,7 @@ public class MyCamera extends Fragment {
 
         takePhotoButton = view.findViewById(R.id.camera_takePhotoButton);
         previewView = view.findViewById(R.id.camera_previewView);
-        imageView = view.findViewById(R.id.camera_imageView);
-        imageView.setImageResource(R.drawable.ic_launcher_foreground);
+
 
         View.OnClickListener listener = new View.OnClickListener() {
             @Override
@@ -147,7 +145,9 @@ public class MyCamera extends Fragment {
             }
 
             Preview preview = new Preview.Builder().build();
-            preview.setSurfaceProvider(previewView.getSurfaceProvider());
+            if(previewView != null) {
+                preview.setSurfaceProvider(previewView.getSurfaceProvider());
+            }
 
             imageCapture = new ImageCapture.Builder().build();
 
@@ -155,6 +155,30 @@ public class MyCamera extends Fragment {
             try {
                 cameraProvider.unbindAll();
                 cameraProvider.bindToLifecycle(getActivity(), cameraSelector, preview, imageCapture);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        }, ContextCompat.getMainExecutor(AppContext));
+    }
+
+    public void stopCamera() {
+        ListenableFuture<ProcessCameraProvider> cameraProviderListenableFuture = ProcessCameraProvider.getInstance(AppContext);
+
+        cameraProviderListenableFuture.addListener(() -> {
+            ProcessCameraProvider cameraProvider;
+            try {
+                cameraProvider = cameraProviderListenableFuture.get();
+            } catch (ExecutionException | InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+
+            Preview preview = new Preview.Builder().build();
+            preview.setSurfaceProvider(null);
+
+            try {
+                cameraProvider.unbindAll();
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -176,23 +200,21 @@ public class MyCamera extends Fragment {
                     public void onCaptureSuccess(@NonNull ImageProxy imageProxy) {
                         Bundle bundle = new Bundle();
                         Date date = new Date();
-                        Uri path;
+                        String path;
                         Image image = imageProxy.getImage();
                         Bitmap bitmap = imageProxy.toBitmap();
                         Matrix matrix = new Matrix();
                         matrix.postRotate(90);
                         bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
-                        MediaStore.Images.Media.insertImage(getActivity().getContentResolver(), bitmap, "MEMORIES_IMAGES" + date.getTime(), "");
-                        path = MediaStore.Images.Media.getContentUri("MEMORIES_IMAGES" + date.getTime());
-                        imageView.setImageURI(path);
-                        bundle.putString("imagePath" , path.toString());
+                        path = MediaStore.Images.Media.insertImage(getActivity().getContentResolver(), bitmap, "MEMORIES_IMAGES" + date.getTime(), "");
+                        bundle.putString("imagePath" , path);
+                        System.out.println("Photo taken path: " + path);
                         Toast.makeText(baseContext, "Zrobiono zdjecie", Toast.LENGTH_SHORT).show();
                         if(path != null) {
-                            //String temp;
-                            //temp = bundle.getString("imagePath");
-                            //Toast.makeText(baseContext, temp, Toast.LENGTH_SHORT).show();
                             Navigation.findNavController(thisView).navigate(R.id.navigate_to_add_from_camera, bundle);
                         }
+                        stopCamera();
+                        getParentFragmentManager().beginTransaction().remove(MyCamera.this).commit();
                     }
 
                     @Override

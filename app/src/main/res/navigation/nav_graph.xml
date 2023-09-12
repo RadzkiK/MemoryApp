@@ -28,6 +28,9 @@
         <action
             android:id="@+id/navigate_to_memory_from_list"
             app:destination="@id/memory" />
+        <action
+            android:id="@+id/navigate_to_home_from_list"
+            app:destination="@id/homeFragment" />
     </fragment>
     <fragment
         android:id="@+id/memory"
@@ -37,6 +40,9 @@
         <action
             android:id="@+id/navigate_to_list_from_memory"
             app:destination="@id/memory_list_fragment" />
+        <argument
+            android:name="memoryID"
+            app:argType="long" />
     </fragment>
     <fragment
         android:id="@+id/add_memory"
@@ -45,7 +51,10 @@
         tools:layout="@layout/fragment_add_memory" >
         <action
             android:id="@+id/navigate_to_memory_from_add"
-            app:destination="@id/memory" />
+            app:destination="@id/memory" >
+            <argument
+                android:name="memoryID" />
+        </action>
         <action
             android:id="@+id/navigate_to_camera_from_add"
             app:destination="@id/camera" />
