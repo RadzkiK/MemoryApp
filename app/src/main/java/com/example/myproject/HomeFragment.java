@@ -1,14 +1,23 @@
 package com.example.myproject;
 
+import static android.os.SystemClock.sleep;
+
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
+import androidx.viewpager2.widget.ViewPager2;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+
+import com.example.myproject.Database.MemoriesDatabase;
+import com.example.myproject.Database.MemoriesExecutors;
+import com.example.myproject.Database.MemoryClass;
+
+import java.util.concurrent.Future;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -28,6 +37,10 @@ public class HomeFragment extends Fragment {
 
     private Button addButton;
     private Button showAllButton;
+    private MemoryClass memories[];
+    private MemoriesDatabase memoriesDatabase;
+    private ViewPager2 viewPager2;
+    private Future future;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -54,10 +67,18 @@ public class HomeFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        memoriesDatabase = MemoriesDatabase.getInstance(getContext());
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+        future = MemoriesExecutors.getInstance().getDiskIO().submit(new Runnable() {
+            @Override
+            public void run() {
+                memories = memoriesDatabase.memoriesDao().loadLast5Memories();
+                System.out.println("Pobrano wspomnienia z bazy danych");
+            }
+        });
     }
 
     @Override
@@ -67,6 +88,43 @@ public class HomeFragment extends Fragment {
         View view =  inflater.inflate(R.layout.fragment_home, container, false);
         addButton = view.findViewById(R.id.button);
         showAllButton = view.findViewById(R.id.button2);
+        viewPager2 = view.findViewById(R.id.viewpager_home);
+        ViewPager2Adapter viewPager2Adapter;
+
+        while(!future.isDone())
+        {
+            sleep(1);
+        }
+        if(memories != null) {
+            viewPager2Adapter = new ViewPager2Adapter(memories, getContext());
+            viewPager2.setAdapter(viewPager2Adapter);
+            viewPager2.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+                @Override
+                public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+                    super.onPageScrolled(position, positionOffset, positionOffsetPixels);
+                }
+
+                @Override
+                public void onPageSelected(int position) {
+                    super.onPageSelected(position);
+                }
+
+                @Override
+                public void onPageScrollStateChanged(int state) {
+                    super.onPageScrollStateChanged(state);
+                }
+            });
+        }
+
+        viewPager2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int item = viewPager2.getCurrentItem();
+                Bundle bundle = new Bundle();
+                bundle.putLong("memoryID", memories[item].getId());
+                Navigation.findNavController(view).navigate(R.id.navigate_to_memory_from_home, bundle);
+            }
+        });
 
         View.OnClickListener listener = new View.OnClickListener() {
             @Override

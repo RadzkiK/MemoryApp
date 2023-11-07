@@ -13,9 +13,9 @@ public interface MemoriesDao {
     @Query("SELECT * FROM memories")
     public MemoryClass[] loadAllMemories();
 
-    @Query("SELECT photoPath FROM memories WHERE id == :memoryID")
-    public String loadPhotoPathOfImageWithID(Long memoryID);
-
     @Query("SELECT * FROM memories WHERE id == :memoryID")
     public MemoryClass loadMemoryWithID(Long memoryID);
+
+    @Query("SELECT * FROM memories ORDER BY id desc LIMIT 5")
+    public MemoryClass[] loadLast5Memories();
 }

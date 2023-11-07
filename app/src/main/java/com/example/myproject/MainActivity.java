@@ -14,7 +14,7 @@ import com.example.myproject.Database.MemoriesExecutors;
 public class MainActivity extends AppCompatActivity {
 
    // public static Context MyAppsContext;
-    private MemoriesDatabase memoriesDatabase;
+    //private MemoriesDatabase memoriesDatabase;
     //private MemoriesExecutors memoriesExecutors;
 
     @Override
@@ -22,7 +22,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        memoriesDatabase = MemoriesDatabase.getInstance(this);
+        //memoriesDatabase = MemoriesDatabase.getInstance(this);
         //memoriesExecutors = MemoriesExecutors.getInstance();
         //MyAppsContext = getApplicationContext();
     }

@@ -29,36 +29,13 @@
             android:text="Ostatnie wspomnienia"
             android:textSize="15sp" />
 
-        <HorizontalScrollView
+
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/viewpager_home"
             android:layout_width="match_parent"
-            android:layout_height="210dp">
+            android:layout_height="210dp"
+            tools:ignore="InvalidId" />
 
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="200dp"
-                android:orientation="vertical" >
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="150dp"
-                    android:orientation="horizontal">
-                    <TextView
-                        android:id="@+id/memory_title_home"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent">
-
-                    </TextView>
-                    <ImageView
-                        android:id="@+id/memory_imageview_home"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent">
-
-                    </ImageView>
-                </LinearLayout>
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="50dp" />
-            </LinearLayout>
-        </HorizontalScrollView>
 
         <Button
             android:id="@+id/button"
@@ -83,6 +60,9 @@
             android:backgroundTint = "#0000ff"
             android:text="Przeglądaj wszystkie"
             android:textSize="20dp" />
+
+
+
 
     </LinearLayout>
 

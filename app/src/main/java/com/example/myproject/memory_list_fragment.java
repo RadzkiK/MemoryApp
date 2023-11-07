@@ -1,5 +1,7 @@
 package com.example.myproject;
 
+import static android.os.SystemClock.sleep;
+
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -73,7 +75,7 @@ public class memory_list_fragment extends Fragment {
             public void run() {
                 memories = memoriesDatabase.memoriesDao().loadAllMemories();
                 System.out.println("Pobrano wspomnienia z bazy danych");
-                notifyAll();
+                //notifyAll();
             }
         });
 
@@ -87,6 +89,9 @@ public class memory_list_fragment extends Fragment {
 
         listView = view.findViewById(R.id.list);
         backButton = view.findViewById(R.id.backButton_list);
+        while(memories == null) {
+            sleep(2);
+        }
 
         if(memories != null) {
             MemoriesListAdapter memoriesListAdapter = new MemoriesListAdapter(getContext(), memories);

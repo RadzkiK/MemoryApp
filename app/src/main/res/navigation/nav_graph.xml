@@ -19,6 +19,9 @@
                 android:name="imagePath"
                 android:defaultValue="@null" />
         </action>
+        <action
+            android:id="@+id/navigate_to_memory_from_home"
+            app:destination="@id/memory" />
     </fragment>
     <fragment
         android:id="@+id/memory_list_fragment"
